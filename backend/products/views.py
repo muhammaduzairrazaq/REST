@@ -1,9 +1,41 @@
 from requests import Response
-from rest_framework import generics
+from rest_framework import generics, mixins
 from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from .models import Product
 from .serializers import ProductSerializer
+
+
+class ProductMixinView(mixins.ListModelMixin,
+                       mixins.CreateModelMixin,
+                       mixins.RetrieveModelMixin,
+                       mixins.DestroyModelMixin,
+                       mixins.UpdateModelMixin,
+                       generics.GenericAPIView):
+
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_field = 'pk'
+
+    def get(self, request, *args, **kwargs):
+        print(args, kwargs)
+        pk = kwargs.get('pk')
+        if pk is not None:
+            return self.retrieve(request, *args, **kwargs)
+
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+
+product_mixin_view = ProductMixinView.as_view()
 
 
 class ProdutListCreateAPIView(generics.ListCreateAPIView):
@@ -44,7 +76,6 @@ class ProductDestroyAPIView(generics.DestroyAPIView):
         super().perform_destroy(instance)
 
 
-
 # not using this
 
 class ProductListAPIView(generics.ListAPIView):
@@ -53,6 +84,8 @@ class ProductListAPIView(generics.ListAPIView):
     serializer_class = ProductSerializer
 
 # not using this
+
+
 @api_view(['GET', 'POST'])
 def product_alt_view(request, pk=None, *args, **kwargs):
     method = request.method
