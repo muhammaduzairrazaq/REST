@@ -8,8 +8,8 @@ from .import views
 
 
 urlpatterns = [
-    path('', views.product_mixin_view),
-    path('<int:pk>/', views.product_mixin_view),
+    path('', views.ProdutListCreateAPIView.as_view()),
+    path('<int:pk>/', views.ProductDetailAPIView.as_view()),
     path('<int:pk>/delete/', views.product_mixin_view),
-    path('<int:pk>/update/', views.product_mixin_view),
+    path('<int:pk>/update/', views.ProductUpdateAPIView),
 ]
