@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
 from .models import Product
 from .serializers import ProductSerializer
+from .permissions import isStaffEditorPermissions
 
 
 class ProductMixinView(mixins.ListModelMixin,
@@ -12,7 +13,7 @@ class ProductMixinView(mixins.ListModelMixin,
                        mixins.DestroyModelMixin,
                        mixins.UpdateModelMixin,
                        generics.GenericAPIView):
-    
+
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'pk'
@@ -41,8 +42,9 @@ product_mixin_view = ProductMixinView.as_view()
 class ProdutListCreateAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.DjangoModelPermissions]
+    authentication_classes = [
+        authentication.TokenAuthentication, authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAdminUser, isStaffEditorPermissions]
 
     def perform_create(self, serializer):
         print(serializer.validated_data)
